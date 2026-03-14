@@ -1,0 +1,16 @@
+[versions]
+agp = "9.1.0"
+annotation = "1.9.1"
+coreKtx = "1.18.0"
+ezxhelperVersion = "3.1.1-rc1"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+ezxhelper-core = { group = "io.github.kyuubiran.ezxhelper", name = "core", version.ref = "ezxhelperVersion" }
+ezxhelper-xposed = { group = "io.github.kyuubiran.ezxhelper", name = "xposed-api-100", version.ref = "ezxhelperVersion" }
+ezxhelper-utils = { group = "io.github.kyuubiran.ezxhelper", name = "android-utils", version.ref = "ezxhelperVersion" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
