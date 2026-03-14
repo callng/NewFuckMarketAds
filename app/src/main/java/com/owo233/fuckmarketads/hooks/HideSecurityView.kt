@@ -6,6 +6,7 @@ import io.github.kyuubiran.ezxhelper.core.finder.ConstructorFinder.`-Static`.con
 import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder.`-Static`.methodFinder
 import io.github.kyuubiran.ezxhelper.core.util.ClassUtil.loadClass
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
+import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHooks
 
 object HideSecurityView : BaseHook() {
 
@@ -13,10 +14,8 @@ object HideSecurityView : BaseHook() {
         loadClass(
             "com.xiaomi.market.business_ui.main.mine.app_security.MineAppSecurityView"
         ).apply {
-            constructorFinder().forEach { constructor ->
-                constructor.createHook {
-                    after { (it.thisObject as View).visibility = View.GONE }
-                }
+            constructorFinder().toList().createHooks {
+                after { (it.thisObject as View).visibility = View.GONE }
             }
 
             methodFinder().filterByName("checkShown").first().createHook {
