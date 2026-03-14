@@ -1,6 +1,6 @@
 package com.owo233.fuckmarketads
 
-import com.owo233.fuckmarketads.hooks.BaseHook
+import com.owo233.fuckmarketads.hooks.HideSecurityView
 import io.github.kyuubiran.ezxhelper.xposed.EzXposed
 import io.github.libxposed.api.XposedInterface
 import io.github.libxposed.api.XposedModule
@@ -19,7 +19,9 @@ class MainHook(base: XposedInterface, param: ModuleLoadedParam) : XposedModule(b
         if (param.packageName != TARGET_PACKAGE) return
 
         EzXposed.initOnPackageLoaded(param)
-        initHooks()
+        initHooks(
+            HideSecurityView
+        )
     }
 
     private fun initHooks(vararg  hooks: BaseHook) {
@@ -29,7 +31,7 @@ class MainHook(base: XposedInterface, param: ModuleLoadedParam) : XposedModule(b
                 hook.init()
                 hook.isInit = true
             } catch (e: Exception) {
-                log("Failed to init hook: ${hook.javaClass.simpleName}", e)
+                log("Failed to init hook: ${hook.name}", e)
             }
         }
     }

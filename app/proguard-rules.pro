@@ -26,5 +26,11 @@
 }
 
 # Obfuscation
--repackageclasses
+-repackageclasses ''
 -allowaccessmodification
+-dontpreverify
+-overloadaggressively
+-renamesourcefileattribute *
+
+-classobfuscationdictionary obf-dict.txt
+-obfuscationdictionary obf-dict.txt
