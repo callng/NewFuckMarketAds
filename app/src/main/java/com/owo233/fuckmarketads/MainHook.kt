@@ -1,38 +1,17 @@
 package com.owo233.fuckmarketads
 
-import com.owo233.fuckmarketads.hooks.HideSecurityView
-import io.github.kyuubiran.ezxhelper.xposed.EzXposed
+import com.owo233.fuckmarketads.apps.Market
+import com.owo233.fuckmarketads.init.AppRegister
+import com.owo233.fuckmarketads.init.EasyXposedInit
 import io.github.libxposed.api.XposedInterface
-import io.github.libxposed.api.XposedModule
 import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
-import io.github.libxposed.api.XposedModuleInterface.PackageLoadedParam
 
-const val TARGET_PACKAGE = "com.xiaomi.market"
+const val TAG = "FuckMarketAds"
 
-class MainHook(base: XposedInterface, param: ModuleLoadedParam) : XposedModule(base, param) {
+class MainHook(base: XposedInterface, param: ModuleLoadedParam) : EasyXposedInit(base, param) {
 
-    init {
-        EzXposed.initXposedModule(base)
-    }
-
-    override fun onPackageLoaded(param: PackageLoadedParam) {
-        if (param.packageName != TARGET_PACKAGE) return
-
-        EzXposed.initOnPackageLoaded(param)
-        initHooks(
-            HideSecurityView
+    override val registerApp: Set<AppRegister>
+        get() = setOf(
+            Market
         )
-    }
-
-    private fun initHooks(vararg  hooks: BaseHook) {
-        for (hook in hooks) {
-            try {
-                if (hook.isInit) continue
-                hook.init()
-                hook.isInit = true
-            } catch (e: Exception) {
-                log("Failed to init hook: ${hook.name}", e)
-            }
-        }
-    }
 }
