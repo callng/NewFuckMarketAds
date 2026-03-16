@@ -1,6 +1,7 @@
 package com.owo233.fuckmarketads.apps
 
 import com.owo233.fuckmarketads.hooks.market.HideSecurityView
+import com.owo233.fuckmarketads.hooks.market.MiscApply
 import com.owo233.fuckmarketads.hooks.market.RemoveAds
 import com.owo233.fuckmarketads.hooks.market.TabFilter
 import com.owo233.fuckmarketads.init.AppPackage
@@ -16,7 +17,8 @@ object Market : AppRegister() {
             param,
             HideSecurityView,
             TabFilter,
-            RemoveAds
+            RemoveAds,
+            MiscApply
         )
     }
 }

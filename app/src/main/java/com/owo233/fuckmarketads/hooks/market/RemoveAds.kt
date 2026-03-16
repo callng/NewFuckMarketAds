@@ -1,7 +1,9 @@
 package com.owo233.fuckmarketads.hooks.market
 
+import android.view.View
 import com.owo233.fuckmarketads.init.BaseHook
 import com.owo233.fuckmarketads.util.getFieldValue
+import com.owo233.fuckmarketads.util.invokeAs
 import com.owo233.fuckmarketads.util.setFieldValue
 import io.github.kyuubiran.ezxhelper.core.finder.ConstructorFinder.`-Static`.constructorFinder
 import io.github.kyuubiran.ezxhelper.core.finder.FieldFinder.`-Static`.fieldFinder
@@ -9,6 +11,7 @@ import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder.`-Static`.methodFi
 import io.github.kyuubiran.ezxhelper.core.util.ClassUtil
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createAfterHook
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createAfterHooks
+import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createBeforeHook
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
 import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHooks
 
@@ -191,6 +194,43 @@ object RemoveAds : BaseHook() {
             .first()
             .createAfterHook { param ->
                 param.thisObject.setFieldValue("detailType", detailTypeV4)
+            }
+
+        // 主页
+        ClassUtil.loadClass("com.xiaomi.market.common.view.ListAppsView")
+            .methodFinder()
+            .filterByName("onBindData")
+            .first()
+            .createBeforeHook { param ->
+                val bean = param.args[1] ?: return@createBeforeHook
+                val componentType = bean.invokeAs<String>("getComponentType")
+                /**
+                 * nativeFeaturedHorizontalVideoList
+                 * horizontalApps
+                 */
+                val blackList = listOf("VideoList", "Apps")
+                if (blackList.any { componentType?.contains(it) == true }) {
+                    val view = param.thisObject as View
+                    view.visibility = View.GONE
+                    view.layoutParams.height = 0
+                    param.result = null
+                }
+            }
+
+        // 热词容器
+        ClassUtil.loadClass("com.xiaomi.market.common.component.hotwords.view.VerticalHotWordsView")
+            .methodFinder()
+            .filterByName("onBindData")
+            .first()
+            .createBeforeHook { param ->
+                val view = param.thisObject as View
+                view.visibility = View.GONE
+                val lp = view.layoutParams
+                if (lp != null) {
+                    lp.height = 0
+                    view.layoutParams = lp
+                }
+                param.result = null
             }
     }
 }
