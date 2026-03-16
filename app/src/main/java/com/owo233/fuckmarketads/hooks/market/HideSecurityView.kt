@@ -18,8 +18,12 @@ object HideSecurityView : BaseHook() {
                 after { (it.thisObject as View).visibility = View.GONE }
             }
 
+            methodFinder().filterByName("checkSettingSwitch").first().createHook {
+                returnConstant(false)
+            }
+
             methodFinder().filterByName("checkShown").first().createHook {
-                before { it.result = false }
+                returnConstant(false)
             }
         }
     }

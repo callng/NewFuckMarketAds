@@ -4,8 +4,6 @@ import io.github.libxposed.api.XposedInterface
 
 internal object HookEnv {
 
-    val moduleClassLoader: ClassLoader by lazy { this::class.java.classLoader!! }
-
     lateinit var base: XposedInterface
         private set
 
