@@ -1,6 +1,7 @@
 package com.owo233.fuckmarketads
 
 import com.owo233.fuckmarketads.apps.Market
+import com.owo233.fuckmarketads.apps.Updater
 import com.owo233.fuckmarketads.init.AppRegister
 import com.owo233.fuckmarketads.init.EasyXposedInit
 import io.github.libxposed.api.XposedInterface
@@ -12,6 +13,7 @@ class MainHook(base: XposedInterface, param: ModuleLoadedParam) : EasyXposedInit
 
     override val registerApp: Set<AppRegister>
         get() = setOf(
-            Market
+            Market,
+            Updater
         )
 }

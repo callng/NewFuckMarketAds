@@ -10,7 +10,8 @@ import io.github.libxposed.api.XposedModuleInterface
 
 object Market : AppRegister() {
 
-    override val packageName: String get() = AppPackage.MARKET
+    override val packageName: String
+        get() = AppPackage.MARKET
 
     override fun onPackageLoaded(param: XposedModuleInterface.PackageLoadedParam) {
         autoInitHooks(
