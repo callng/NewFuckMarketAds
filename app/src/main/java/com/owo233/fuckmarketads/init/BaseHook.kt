@@ -4,7 +4,7 @@ import io.github.libxposed.api.XposedModuleInterface
 
 abstract class BaseHook {
 
-    private lateinit var param: XposedModuleInterface.PackageLoadedParam
+    private lateinit var param: XposedModuleInterface.PackageReadyParam
 
     var isInit: Boolean = false
 
@@ -12,11 +12,11 @@ abstract class BaseHook {
 
     abstract fun init()
 
-    fun setParam(param: XposedModuleInterface.PackageLoadedParam) {
+    fun setParam(param: XposedModuleInterface.PackageReadyParam) {
         this.param = param
     }
 
-    protected fun getParam(): XposedModuleInterface.PackageLoadedParam {
+    protected fun getParam(): XposedModuleInterface.PackageReadyParam {
         if (!this::param.isInitialized) {
             throw IllegalStateException("param should be initialized.")
         }

@@ -1,6 +1,7 @@
 package com.owo233.fuckmarketads.hooks.market
 
 import android.view.View
+import com.owo233.fuckmarketads.HookEnv
 import com.owo233.fuckmarketads.init.BaseHook
 import com.owo233.fuckmarketads.util.getFieldValue
 import com.owo233.fuckmarketads.util.invokeAs
@@ -9,11 +10,6 @@ import io.github.kyuubiran.ezxhelper.core.finder.ConstructorFinder.`-Static`.con
 import io.github.kyuubiran.ezxhelper.core.finder.FieldFinder.`-Static`.fieldFinder
 import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder.`-Static`.methodFinder
 import io.github.kyuubiran.ezxhelper.core.util.ClassUtil
-import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createAfterHook
-import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createAfterHooks
-import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createBeforeHook
-import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHook
-import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createHooks
 
 object RemoveAds : BaseHook() {
 
@@ -36,17 +32,20 @@ object RemoveAds : BaseHook() {
             .methodFinder()
             .filterByName("parseRecommendGroupResult")
             .first()
-            .createHook { returnConstant(null) }
+            .also { HookEnv.base.hook(it).intercept { null } }
 
         // 搜索建议
         ClassUtil.loadClass("com.xiaomi.market.business_ui.search.NativeSearchSugFragment")
             .methodFinder()
             .filterByName("getRequestParams")
             .first()
-            .createAfterHook { param ->
-                @Suppress("UNCHECKED_CAST")
-                param.result = (param.result as Map<String, Any>).toMutableMap().apply {
-                    this["adFlag"] = 0
+            .also { method ->
+                HookEnv.base.hook(method).intercept { chain ->
+                    val result = chain.proceed()
+                    @Suppress("UNCHECKED_CAST")
+                    return@intercept (result as Map<String, Any>).toMutableMap().apply {
+                        this["adFlag"] = 0
+                    }
                 }
             }
 
@@ -55,18 +54,21 @@ object RemoveAds : BaseHook() {
             methodFinder()
                 .filterByName("parseResponseData")
                 .first()
-                .createAfterHook { param ->
-                    // com.xiaomi.market.common.component.componentbeans.SearchHistoryComponent
-                    @Suppress("UNCHECKED_CAST")
-                    param.result = (param.result as List<Any>).filter { component ->
-                        component.javaClass.name.contains("SearchHistoryComponent")
+                .also { method ->
+                    HookEnv.base.hook(method).intercept { chain ->
+                        val result = chain.proceed()
+                        // com.xiaomi.market.common.component.componentbeans.SearchHistoryComponent
+                        @Suppress("UNCHECKED_CAST")
+                        return@intercept (result as List<Any>).filter { component ->
+                            component.javaClass.name.contains("SearchHistoryComponent")
+                        }
                     }
                 }
 
             methodFinder()
                 .filterByName("isLoadMoreEndGone")
                 .first()
-                .createHook { returnConstant(true) }
+                .also { HookEnv.base.hook(it).intercept { true } }
         }
 
         // 搜索结果页面
@@ -75,11 +77,14 @@ object RemoveAds : BaseHook() {
             .methodFinder()
             .filterByName("parseResponseData")
             .first()
-            .createAfterHook { param ->
-                // com.xiaomi.market.common.component.componentbeans.ListAppComponent
-                @Suppress("UNCHECKED_CAST")
-                param.result = (param.result as List<Any>).filter { component ->
-                    component.javaClass.name.contains("ListAppComponent")
+            .also { method ->
+                HookEnv.base.hook(method).intercept { chain ->
+                    val result = chain.proceed()
+                    // com.xiaomi.market.common.component.componentbeans.ListAppComponent
+                    @Suppress("UNCHECKED_CAST")
+                    return@intercept (result as List<Any>).filter { component ->
+                        component.javaClass.name.contains("ListAppComponent")
+                    }
                 }
             }
 
@@ -88,25 +93,30 @@ object RemoveAds : BaseHook() {
             methodFinder()
                 .filterByName("generateRecommendGroupItems")
                 .first()
-                .createHook { returnConstant(null) }
+                .also { HookEnv.base.hook(it).intercept { null } }
 
-            constructorFinder().toList()
-                .createAfterHooks { param ->
+            constructorFinder().forEach { ctor ->
+                HookEnv.base.hook(ctor).intercept { chain ->
+                    val result = chain.proceed()
+
                     fieldFinder()
                         .filterByName("forceExpanded")
                         .first()
-                        .set(param.thisObject, true)
+                        .set(chain.thisObject, true)
 
                     fieldFinder()
                         .filterByName("foldButtonVisible")
                         .first()
-                        .set(param.thisObject, false)
+                        .set(chain.thisObject, false)
 
                     fieldFinder()
                         .filterByName("pageCollapseState")
                         .first()
-                        .set(param.thisObject, pageCollapseStateExpand)
+                        .set(chain.thisObject, pageCollapseStateExpand)
+                    
+                    return@intercept result
                 }
+            }
         }
 
         // 应用详情页
@@ -117,7 +127,7 @@ object RemoveAds : BaseHook() {
                         "isBrowserMarketAdOff",
                         "isBrowserSourceFileAdOff"
                     )
-                }.toList().createHooks { returnConstant(true) }
+                }.forEach { HookEnv.base.hook(it).intercept { true } }
 
             methodFinder()
                 .filter {
@@ -131,7 +141,7 @@ object RemoveAds : BaseHook() {
                         "isSourceFileShowAdStyle",
                         "getShowOpenScreenAd"
                     )
-                }.toList().createHooks { returnConstant(false) }
+                }.forEach { HookEnv.base.hook(it).intercept { false } }
         }
 
         // 开屏广告
@@ -144,12 +154,12 @@ object RemoveAds : BaseHook() {
                         "isOpenFromMsa",
                         "isRequesting"
                     )
-                }.toList().createHooks { returnConstant(false) }
+                }.forEach { HookEnv.base.hook(it).intercept { false } }
 
             methodFinder()
                 .filterByName("tryToRequestSplashAd")
                 .first()
-                .createHook { returnConstant(null) }
+                .also { HookEnv.base.hook(it).intercept { null } }
         }
 
         // 底层
@@ -162,7 +172,7 @@ object RemoveAds : BaseHook() {
                         "needRequestFocusVideo",
                         "isPassiveSplashAd"
                     )
-                }.toList().createHooks { returnConstant(false) }
+                }.forEach { HookEnv.base.hook(it).intercept { false } }
 
             methodFinder()
                 .filter {
@@ -172,7 +182,7 @@ object RemoveAds : BaseHook() {
                         "preLoadSplashCover",
                         "shownSplashCoverIfNeed"
                     )
-                }.toList().createHooks { returnConstant(null) }
+                }.forEach { HookEnv.base.hook(it).intercept { null } }
         }
 
         // 主界面核心
@@ -185,15 +195,18 @@ object RemoveAds : BaseHook() {
                     "trySplash",
                     "fetchSearchHotList"
                 )
-            }.toList().createHooks { returnConstant(null) }
+            }.forEach { HookEnv.base.hook(it).intercept { null } }
 
         // 应用详情
         ClassUtil.loadClass("com.xiaomi.market.ui.detail.BaseDetailActivity")
             .methodFinder()
             .filterByName("initParams")
             .first()
-            .createAfterHook { param ->
-                param.thisObject.setFieldValue("detailType", detailTypeV4)
+            .also { method ->
+                HookEnv.base.hook(method).intercept { chain ->
+                    chain.thisObject?.setFieldValue("detailType", detailTypeV4)
+                    return@intercept chain.proceed()
+                }
             }
 
         // 主页
@@ -201,19 +214,24 @@ object RemoveAds : BaseHook() {
             .methodFinder()
             .filterByName("onBindData")
             .first()
-            .createBeforeHook { param ->
-                val bean = param.args[1] ?: return@createBeforeHook
-                val componentType = bean.invokeAs<String>("getComponentType")
-                /**
-                 * nativeFeaturedHorizontalVideoList
-                 * horizontalApps
-                 */
-                val blackList = listOf("VideoList", "Apps")
-                if (blackList.any { componentType?.contains(it) == true }) {
-                    val view = param.thisObject as View
-                    view.visibility = View.GONE
-                    view.layoutParams.height = 0
-                    param.result = null
+            .also { method ->
+                HookEnv.base.hook(method).intercept { chain ->
+                    val bean = chain.args.getOrNull(1)
+                    if (bean != null) {
+                        val componentType = bean.invokeAs<String>("getComponentType")
+                        /**
+                         * nativeFeaturedHorizontalVideoList
+                         * horizontalApps
+                         */
+                        val blackList = listOf("VideoList", "Apps")
+                        if (blackList.any { componentType?.contains(it) == true }) {
+                            val view = chain.thisObject as View
+                            view.visibility = View.GONE
+                            view.layoutParams.height = 0
+                            return@intercept null
+                        }
+                    }
+                    return@intercept chain.proceed()
                 }
             }
 
@@ -222,15 +240,17 @@ object RemoveAds : BaseHook() {
             .methodFinder()
             .filterByName("onBindData")
             .first()
-            .createBeforeHook { param ->
-                val view = param.thisObject as View
-                view.visibility = View.GONE
-                val lp = view.layoutParams
-                if (lp != null) {
-                    lp.height = 0
-                    view.layoutParams = lp
+            .also { method ->
+                HookEnv.base.hook(method).intercept { chain ->
+                    val view = chain.thisObject as View
+                    view.visibility = View.GONE
+                    val lp = view.layoutParams
+                    if (lp != null) {
+                        lp.height = 0
+                        view.layoutParams = lp
+                    }
+                    return@intercept null
                 }
-                param.result = null
             }
     }
 }

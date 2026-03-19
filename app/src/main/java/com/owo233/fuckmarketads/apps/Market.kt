@@ -13,7 +13,7 @@ object Market : AppRegister() {
     override val packageName: String
         get() = AppPackage.MARKET
 
-    override fun onPackageLoaded(param: XposedModuleInterface.PackageLoadedParam) {
+    override fun onPackageReady(param: XposedModuleInterface.PackageReadyParam) {
         autoInitHooks(
             param,
             HideSecurityView,

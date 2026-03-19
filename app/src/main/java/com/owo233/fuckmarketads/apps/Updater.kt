@@ -10,7 +10,7 @@ object Updater : AppRegister() {
     override val packageName: String
         get() = AppPackage.UPDATER
 
-    override fun onPackageLoaded(param: XposedModuleInterface.PackageLoadedParam) {
+    override fun onPackageReady(param: XposedModuleInterface.PackageReadyParam) {
         autoInitHooks(
             param,
             BypassOTACheck

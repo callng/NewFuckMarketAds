@@ -34,7 +34,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Fuck Market Ads"
-include(
-    ":app",
-    ":libs:libxposed:api"
-)
+include(":app")

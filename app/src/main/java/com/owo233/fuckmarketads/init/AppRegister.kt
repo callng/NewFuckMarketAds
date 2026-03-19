@@ -9,10 +9,10 @@ abstract class AppRegister : XposedModuleInterface {
 
     abstract val packageName: String
 
-    override fun onPackageLoaded(param: XposedModuleInterface.PackageLoadedParam) = Unit
+    override fun onPackageReady(param: XposedModuleInterface.PackageReadyParam) {}
 
     protected fun autoInitHooks(
-        param: XposedModuleInterface.PackageLoadedParam,
+        param: XposedModuleInterface.PackageReadyParam,
         vararg hooks: BaseHook
     ) {
         hooks.also {

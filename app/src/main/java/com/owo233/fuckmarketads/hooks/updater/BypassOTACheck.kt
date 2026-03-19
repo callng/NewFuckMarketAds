@@ -1,9 +1,9 @@
 package com.owo233.fuckmarketads.hooks.updater
 
+import com.owo233.fuckmarketads.HookEnv
 import com.owo233.fuckmarketads.init.BaseHook
 import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder.`-Static`.methodFinder
 import io.github.kyuubiran.ezxhelper.core.util.ClassUtil
-import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createBeforeHook
 
 object BypassOTACheck : BaseHook() {
 
@@ -27,11 +27,14 @@ object BypassOTACheck : BaseHook() {
                 .filterByName("hasFeature")
                 .filterByParamCount(2)
                 .filterByParamTypes(String::class.java, Int::class.javaPrimitiveType)
-                .single()
-                .createBeforeHook { param ->
-                    when (param.args[0] as String) {
-                        FEATURE_SUPPORT_OTA_VALIDATE -> param.result = false
-                        FEATURE_SUPPORT_UPDATE_FROM_SDCARD -> param.result = true
+                .single().also { method ->
+                    HookEnv.base.hook(method).intercept { chain ->
+                        when (chain.args[0] as String) {
+                            FEATURE_SUPPORT_OTA_VALIDATE -> return@intercept false
+                            FEATURE_SUPPORT_UPDATE_FROM_SDCARD -> return@intercept true
+                        }
+
+                        return@intercept chain.proceed()
                     }
                 }
 
@@ -47,10 +50,13 @@ object BypassOTACheck : BaseHook() {
                 .filterByName("getBoolean")
                 .filterByParamCount(2)
                 .filterByParamTypes(String::class.java, Boolean::class.javaPrimitiveType)
-                .single()
-                .createBeforeHook { param ->
-                    when (param.args[0] as String) {
-                        FEATURE_SUPPORT_UPDATE_FROM_SDCARD -> param.result = true
+                .single().also { method ->
+                    HookEnv.base.hook(method).intercept { chain ->
+                        when (chain.args[0] as String) {
+                            FEATURE_SUPPORT_UPDATE_FROM_SDCARD -> return@intercept true
+                        }
+
+                        return@intercept chain.proceed()
                     }
                 }
         }

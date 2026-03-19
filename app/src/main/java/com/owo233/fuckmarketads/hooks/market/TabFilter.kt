@@ -1,10 +1,10 @@
 package com.owo233.fuckmarketads.hooks.market
 
+import com.owo233.fuckmarketads.HookEnv
 import com.owo233.fuckmarketads.init.BaseHook
 import io.github.kyuubiran.ezxhelper.core.finder.FieldFinder.`-Static`.fieldFinder
 import io.github.kyuubiran.ezxhelper.core.finder.MethodFinder.`-Static`.methodFinder
 import io.github.kyuubiran.ezxhelper.core.util.ClassUtil
-import io.github.kyuubiran.ezxhelper.xposed.dsl.HookFactory.`-Static`.createAfterHook
 
 object TabFilter : BaseHook() {
 
@@ -35,13 +35,16 @@ object TabFilter : BaseHook() {
                 .filterByName("fromJSON")
                 .filterByParamCount(1)
                 .first()
-                .createAfterHook { param ->
-                    val list = (param.result as List<*>).toMutableList()
-                    list.removeAll { item ->
-                        val tag = tabField.get(item) as String
-                        keepPrefixes.none { prefix -> tag.startsWith(prefix) }
+                .also { method ->
+                    HookEnv.base.hook(method).intercept { chain ->
+                        val result = chain.proceed()
+                        val list = (result as List<*>).toMutableList()
+                        list.removeAll { item ->
+                            val tag = tabField.get(item) as String
+                            keepPrefixes.none { prefix -> tag.startsWith(prefix) }
+                        }
+                        return@intercept list
                     }
-                    param.result = list
                 }
         }
     }

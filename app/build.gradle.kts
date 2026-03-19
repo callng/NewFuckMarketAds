@@ -47,8 +47,6 @@ android {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
-    compileOnly(project(":libs:libxposed:api"))
+    compileOnly(libs.libxposed.api)
     implementation(libs.ezxhelper.core)
-    implementation(libs.ezxhelper.xposed)
-    implementation(libs.ezxhelper.utils)
 }
