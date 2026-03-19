@@ -18,8 +18,8 @@ android {
         applicationId = "com.owo233.fuckmarketads"
         minSdk = 31
         targetSdk = 36
-        versionCode = 25
-        versionName = "1.2.5"
+        versionCode = 26
+        versionName = "1.2.6"
         buildConfigField("String", "APP_NAME", "\"Fuck Market Ads\"")
     }
 
