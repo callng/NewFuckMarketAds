@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         applicationId = "com.owo233.fuckmarketads"
-        minSdk = 31
+        minSdk = 29
         targetSdk = 36
         versionCode = 26
         versionName = "1.2.6"
